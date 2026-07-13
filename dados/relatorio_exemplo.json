@@ -1,36 +1,36 @@
 {
-  "titulo": "Radar da semana: 32 asteroides monitorados",
-  "nivel_semana": "Elevada",
-  "resumo_executivo": "A NASA registrou 32 aproximações nesta semana, sendo 4 classificadas como potencialmente perigosas. O objeto mais próximo passou a 18 distâncias lunares.",
+  "titulo": "Resumo Semanal de Asteroides Próximos à Terra",
+  "nivel_semana": "Atenção",
+  "resumo_executivo": "Nesta semana, monitoramos 32 asteroides próximos à Terra, dos quais 4 são considerados potencialmente perigosos pela NASA. O maior asteroide detectado possui um diâmetro de 1012.8 metros e a menor distância de passagem foi de 17.8 distâncias lunares.",
   "bullets": [
-    "32 asteroides monitorados na semana.",
-    "4 com flag oficial de risco da NASA.",
-    "Maior objeto: 1013 m de diâmetro.",
-    "Passagem mais próxima: 17.8 distâncias lunares."
+    "Total de asteroides monitorados: 32",
+    "Número de asteroides perigosos (NASA): 4",
+    "Maior diâmetro registrado: 1012.8 metros",
+    "Menor distância de passagem: 17.8 distâncias lunares"
   ],
   "objetos_destaque": [
     {
-      "nome": "452639 (2005 UY6",
-      "motivo": "passa a 70 distâncias lunares.",
-      "score_risco": 100.0,
-      "distancia_lunar": 69.9,
-      "diametro_m": 1012.8
+      "nome": "250680 (2005 QC5",
+      "motivo": "Considerado potencialmente perigoso pela NASA, requer atenção especial.",
+      "score_risco": 79.7,
+      "distancia_lunar": 79.2,
+      "diametro_m": 510.0
     },
     {
-      "nome": "663491 (2007 RT9",
-      "motivo": "passa a 154 distâncias lunares.",
-      "score_risco": 80.8,
-      "distancia_lunar": 154.0,
-      "diametro_m": 663.0
+      "nome": "2013 AS27",
+      "motivo": "Considerado potencialmente perigoso pela NASA, requer atenção especial.",
+      "score_risco": 77.9,
+      "distancia_lunar": 33.0,
+      "diametro_m": 227.8
     },
     {
-      "nome": "2007 RT9",
-      "motivo": "passa a 154 distâncias lunares.",
-      "score_risco": 80.7,
-      "distancia_lunar": 154.0,
-      "diametro_m": 657.0
+      "nome": "2016 NG15",
+      "motivo": "Considerado potencialmente perigoso pela NASA, requer atenção especial.",
+      "score_risco": 75.9,
+      "distancia_lunar": 74.9,
+      "diametro_m": 323.3
     }
   ],
-  "numero_destaque": "32 asteroides monitorados",
-  "alerta": "4 objeto(s) marcados como potencialmente perigosos pela NASA."
+  "numero_destaque": "4 asteroides considerados perigosos pela NASA.",
+  "alerta": "Atenção: 4 asteroides potencialmente perigosos identificados."
 }

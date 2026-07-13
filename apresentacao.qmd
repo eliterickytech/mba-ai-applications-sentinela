@@ -39,7 +39,7 @@ print("""
 |---|---|
 | **Coleta** | NASA NeoWs (API pública) → dados da semana |
 | **Baseline** | score físico de risco (tamanho, velocidade, distância) |
-| **LLM** | Claude com **saída estruturada** (Pydantic) → resumo executivo |
+| **LLM** | GPT com **saída estruturada** (Pydantic) → resumo executivo |
 | **Avaliação** | 3 camadas (vs. NASA, concordância, regra de ouro) |
 | **Entrega** | WhatsApp automático, agendado no GitHub Actions |
 """)

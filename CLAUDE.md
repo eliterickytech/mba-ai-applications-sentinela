@@ -31,7 +31,7 @@ classificação oficial da NASA (`is_potentially_hazardous_asteroid`).
 
 1. `coleta.py`  — NeoWs → DataFrame limpo da semana (retry + backoff).
 2. `score.py`   — baseline de risco físico (tamanho, velocidade, distância).
-3. `resumo.py`  — LLM (Anthropic) com **saída estruturada Pydantic**.
+3. `resumo.py`  — LLM (OpenAI / GPT) com **saída estruturada Pydantic**.
 4. `notifica.py`— envio pela WhatsApp Cloud API (Meta).
 5. `main.py`    — orquestra coleta → score → resumo → notifica.
 6. `avaliacao.qmd` — paper Quarto (as 6 fases; números só via código).

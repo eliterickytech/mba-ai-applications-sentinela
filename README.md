@@ -21,9 +21,9 @@ pip install -r requirements.txt
 
 # 2. Chaves (copie e preencha)
 cp .env.example .env
-#   NASA_API_KEY      -> funciona com DEMO_KEY; sua chave grátis em api.nasa.gov
-#   ANTHROPIC_API_KEY -> console.anthropic.com  (necessária para o LLM real)
-#   WHATSAPP_*        -> developers.facebook.com (opcional; ver seção WhatsApp)
+#   NASA_API_KEY   -> funciona com DEMO_KEY; sua chave grátis em api.nasa.gov
+#   OPENAI_API_KEY -> platform.openai.com/api-keys  (necessária para o LLM real)
+#   WHATSAPP_*     -> developers.facebook.com (opcional; ver seção WhatsApp)
 
 # 3. Rodar cada etapa isoladamente
 python coleta.py        # coleta a semana da NASA
@@ -41,7 +41,7 @@ python -m pytest -q
 
 > **Sem chave de LLM?** Use `--simular-llm`: um fallback determinístico monta o mesmo
 > schema a partir dos dados (sem inventar números). Para a entrega, rode com a
-> `ANTHROPIC_API_KEY` de verdade e faça commit do `saidas/relatorio.json` gerado.
+> `OPENAI_API_KEY` de verdade e faça commit do `saidas/relatorio.json` gerado.
 
 ## Relatório (paper) e apresentação
 
@@ -63,7 +63,7 @@ Os `.qmd` leem um *snapshot* real versionado em `dados/amostra_semana.csv`, ent�
 | `coleta.py` | Preparação | NASA NeoWs → DataFrame limpo (retry + backoff) |
 | `score.py` | Modelagem (baseline) | Score de risco físico 0–100 |
 | `schema.py` | Modelagem | Contratos Pydantic (saída estruturada) |
-| `resumo.py` | Modelagem (LLM) | Anthropic + structured output |
+| `resumo.py` | Modelagem (LLM) | OpenAI GPT + structured output |
 | `avaliacao.py` | Avaliação | 3 camadas: vs. NASA, concordância, regra de ouro |
 | `notifica.py` | Implantação | WhatsApp Cloud API |
 | `main.py` | Implantação | Orquestra o pipeline |

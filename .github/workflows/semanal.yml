@@ -26,7 +26,7 @@ jobs:
       - name: Rodar o pipeline (coleta → score → LLM → WhatsApp)
         env:
           NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           WHATSAPP_TOKEN: ${{ secrets.WHATSAPP_TOKEN }}
           WHATSAPP_PHONE_NUMBER_ID: ${{ secrets.WHATSAPP_PHONE_NUMBER_ID }}
           WHATSAPP_DESTINO: ${{ secrets.WHATSAPP_DESTINO }}

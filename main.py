@@ -52,7 +52,7 @@ def executar(simular_llm: bool = False, enviar: bool = True) -> dict:
     df.to_csv(csv_path, index=False, encoding="utf-8")
     log.info("   snapshot salvo em %s", csv_path.name)
 
-    log.info("3/5 Gerando o resumo (%s)...", "SIMULADO" if simular_llm else "LLM Anthropic")
+    log.info("3/5 Gerando o resumo (%s)...", "SIMULADO" if simular_llm else "LLM OpenAI GPT")
     rel = gerar_resumo_simulado(df) if simular_llm else gerar_resumo(df)
 
     log.info("4/5 Avaliando (baseline x NASA, concordância, regra de ouro)...")

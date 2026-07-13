@@ -40,14 +40,10 @@ class RelatorioSemanal(BaseModel):
         description="2-3 frases em linguagem executiva resumindo a semana."
     )
     bullets: list[str] = Field(
-        min_length=3,
-        max_length=5,
         description="3 a 5 pontos objetivos, cada um citando números vindos dos dados.",
     )
     objetos_destaque: list[AsteroideDestaque] = Field(
-        min_length=1,
-        max_length=3,
-        description="1 a 3 asteroides de maior atenção na semana.",
+        description="1 a 3 asteroides de maior atenção na semana (ordem de risco).",
     )
     numero_destaque: str = Field(
         description="O número mais marcante da semana (ex.: '32 asteroides monitorados')."
