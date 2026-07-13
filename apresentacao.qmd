@@ -11,6 +11,7 @@ format:
     transition: fade
     incremental: false
     embed-resources: true
+    include-in-header: fundo.html
 execute:
   eval: true
   echo: false

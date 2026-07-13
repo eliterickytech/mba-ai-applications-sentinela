@@ -15,6 +15,8 @@ __pycache__/
 paper.html
 apresentacao.html
 *.html
+# Exceção: fundo.html é fonte (include-in-header dos slides), não artefato gerado pelo Quarto
+!fundo.html
 
 # Exceção: a entrega final renderizada É versionada
 !entrega/
