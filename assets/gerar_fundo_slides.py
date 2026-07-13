@@ -1,10 +1,13 @@
 """
-Gera o fundo dos slides: nebulosa suave + campo de estrelas + Terra no canto.
+Gera o fundo dos slides: espaço PRETO + estrelas pequenas + Terra real (NASA).
+
+A Terra é a foto "Blue Marble" (Apollo 17), da NASA — domínio público
+(assets/earth-nasa.jpg). Composição por *lighten blend* (np.maximum): o preto ao
+redor do disco não tapa as estrelas.
 
 Produz:
-  - assets/fundo-slides.png   (imagem 1920x1080)
-  - fundo.html                (partial com a imagem embutida em base64, para o
-                               include-in-header do reveal.js — 100% self-contained)
+  - assets/fundo-slides.png   (1920x1080)
+  - fundo.html                (imagem embutida em base64 p/ include-in-header)
 
 Rode: python assets/gerar_fundo_slides.py
 """
@@ -12,71 +15,56 @@ Rode: python assets/gerar_fundo_slides.py
 import base64
 from pathlib import Path
 
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.patches import Circle
+from PIL import Image
 
 W, H = 1920, 1080
 RAIZ = Path(__file__).resolve().parents[1]
 PNG = RAIZ / "assets" / "fundo-slides.png"
-rng = np.random.default_rng(42)
+EARTH = RAIZ / "assets" / "earth-nasa.jpg"
+rng = np.random.default_rng(7)
 
-# --- Campo de nebulosa (numpy) ---
-yy, xx = np.mgrid[0:H, 0:W]
-img = np.zeros((H, W, 3)) + np.array([5, 7, 15]) / 255.0
+# --- Espaço preto ---
+canvas = np.zeros((H, W, 3), dtype=float)
 
+# --- Estrelas pequenas (1px), brilho variado, leve tom azulado em algumas ---
+n = 240
+xs = rng.integers(0, W, n)
+ys = rng.integers(0, H, n)
+brilho = rng.uniform(0.20, 0.85, n)
+tint = np.ones((n, 3))
+azuis = rng.random(n) < 0.25
+tint[azuis] = np.array([0.75, 0.85, 1.0])   # algumas estrelas frias
+canvas[ys, xs] = np.clip(brilho[:, None] * tint, 0, 1)
 
-def blob(cx, cy, r, cor, forca):
-    g = np.exp(-(((xx - cx) ** 2 + (yy - cy) ** 2) / (2 * r * r))) * forca
-    for i, c in enumerate(cor):
-        img[:, :, i] += g * (c / 255.0)
-
-
-blob(W * 0.82, H * 0.18, 430, (46, 196, 241), 0.30)   # nebulosa ciano (topo-dir)
-blob(W * 0.14, H * 0.86, 470, (150, 90, 220), 0.28)   # nebulosa roxa (base-esq)
-blob(W * 0.50, H * 0.48, 720, (14, 26, 58), 0.45)     # brilho central frio
-img = np.clip(img, 0, 1)
-
-fig = plt.figure(figsize=(W / 100, H / 100), dpi=100)
-ax = fig.add_axes([0, 0, 1, 1])
-ax.set_xlim(0, W)
-ax.set_ylim(H, 0)
-ax.axis("off")
-ax.imshow(img, extent=[0, W, H, 0], zorder=0)
-
-# --- Estrelas (varias camadas de tamanho/brilho) ---
-n = 320
-sx, sy = rng.uniform(0, W, n), rng.uniform(0, H, n)
-tam = rng.uniform(0.3, 2.6, n) ** 2 * 4
-alpha = rng.uniform(0.25, 0.95, n)
-cores = np.ones((n, 4))
-cores[:, 3] = alpha
-ax.scatter(sx, sy, s=tam, c=cores, linewidths=0, zorder=1)
-
-# Algumas estrelas brilhantes com leve halo
+# --- Poucas estrelas um pouco maiores (2px) com halo tênue ---
 for _ in range(14):
-    bx, by = rng.uniform(0, W), rng.uniform(0, H)
-    ax.scatter([bx], [by], s=90, c="white", alpha=0.18, linewidths=0, zorder=1)
-    ax.scatter([bx], [by], s=14, c="white", alpha=0.95, linewidths=0, zorder=2)
+    x = int(rng.integers(4, W - 4))
+    y = int(rng.integers(4, H - 4))
+    b = float(rng.uniform(0.6, 1.0))
+    canvas[y - 2:y + 3, x - 2:x + 3] = np.maximum(
+        canvas[y - 2:y + 3, x - 2:x + 3], b * 0.18)   # halo
+    canvas[y:y + 2, x:x + 2] = b                        # núcleo 2px
 
-# --- Terra decorativa no canto inferior direito (sprite radial recortado) ---
-er = 360
-ecx, ecy = W * 0.985, H * 1.03
-gy, gx = np.mgrid[0:2 * er, 0:2 * er]
-dist = np.sqrt((gx - er * 0.62) ** 2 + (gy - er * 0.62) ** 2) / (er * 1.5)
-t = np.clip(1 - dist, 0, 1)[..., None]
-c1, c2, c3 = np.array([9, 26, 58]), np.array([38, 110, 188]), np.array([96, 184, 236])
-col = c1 + (c2 - c1) * t + (c3 - c2) * np.clip((t - 0.5) * 2, 0, 1)
-sprite = np.dstack([col / 255.0, np.ones((2 * er, 2 * er))])
-im = ax.imshow(sprite, extent=[ecx - er, ecx + er, ecy + er, ecy - er], zorder=3)
-im.set_clip_path(Circle((ecx, ecy), er, transform=ax.transData))
-# halo atmosférico
-ax.add_patch(Circle((ecx, ecy), er, fill=False, ec=(0.3, 0.7, 0.95), lw=6, alpha=0.25, zorder=3))
+# --- Terra real, espiando no canto inferior direito ---
+D = 700
+earth = np.asarray(Image.open(EARTH).convert("RGB").resize((D, D), Image.LANCZOS)) / 255.0
 
-fig.savefig(PNG, dpi=100, facecolor="#05070f")
-plt.close(fig)
+# Máscara circular: zera tudo fora do disco (some a borda retangular do JPG).
+gy, gx = np.mgrid[0:D, 0:D]
+dist = np.sqrt((gx - D / 2) ** 2 + (gy - D / 2) ** 2) / (D / 2)
+mascara = np.clip((0.985 - dist) / 0.03, 0, 1)   # borda suave nos ~3% externos
+earth = earth * mascara[..., None]
+
+cx, cy = int(W * 0.985), int(H * 1.06)      # centro fora da tela → só um pedaço aparece
+x0, y0 = cx - D // 2, cy - D // 2
+xa, xb = max(0, x0), min(W, x0 + D)
+ya, yb = max(0, y0), min(H, y0 + D)
+ecrop = earth[ya - y0:yb - y0, xa - x0:xb - x0]
+canvas[ya:yb, xa:xb] = np.maximum(canvas[ya:yb, xa:xb], ecrop)   # lighten blend
+
+# --- Salva o PNG ---
+Image.fromarray((np.clip(canvas, 0, 1) * 255).astype("uint8")).save(PNG)
 
 # --- Embute em base64 no partial HTML ---
 b64 = base64.b64encode(PNG.read_bytes()).decode()
