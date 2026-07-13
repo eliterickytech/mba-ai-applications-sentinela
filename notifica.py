@@ -20,7 +20,7 @@ from schema import RelatorioSemanal
 
 load_dotenv()
 
-GRAPH_VERSION = "v21.0"
+GRAPH_VERSION = "v25.0"
 
 
 def formatar_mensagem(rel: RelatorioSemanal) -> str:
