@@ -16,6 +16,11 @@ paper.html
 apresentacao.html
 *.html
 
+# Exceção: a entrega final renderizada É versionada
+!entrega/
+!entrega/paper.pdf
+!entrega/apresentacao.html
+
 # Dados/saídas geradas
 saidas/
 *.log
