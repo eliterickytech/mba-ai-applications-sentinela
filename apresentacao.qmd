@@ -22,12 +22,14 @@ execute:
 
 A NASA cataloga **dezenas de asteroides por semana** passando perto da Terra.
 
-- A lista bruta **não é acionável** para quem comunica ciência ou avalia risco.
-- A pergunta real: **"o que merece atenção esta semana?"**
+- **Quem decide:** curadoria/comunicação de um planetário, museu de ciências ou
+  jornalismo científico — e qualquer núcleo de risco de baixa probabilidade e alto impacto.
+- **A decisão da semana:** o que destacar, comunicar ou escalar (pauta, post, nota, alerta).
+- **Hoje:** exige um especialista lendo um feed técnico da NASA — ou não é feita, e o
+  relevante passa batido enquanto o trivial vira alarme falso.
 
 ::: {.fragment}
-**Decisão que muda:** para onde o núcleo de divulgação/defesa planetária
-direciona atenção e comunicação na semana.
+**A pergunta real:** *o que merece atenção esta semana?*
 :::
 
 ## A solução — um pipeline, não um chat {.smaller}
@@ -83,11 +85,14 @@ plt.tight_layout(); plt.show()
 
 ## O valor {.smaller}
 
+- **Substitui trabalho especializado**: troca horas de leitura de um feed técnico por um
+  digest de **custo marginal ~zero** (centavos de tokens por semana).
 - **Recall 100%** → nenhum objeto perigoso da NASA escapa do radar semanal.
 - **Honestidade avaliativa**: sabemos *onde* o baseline acerta (triar) e *onde* não se
   propõe a acertar (o critério orbital da NASA).
 - **Automático**: chega sozinho no WhatsApp toda semana — zero intervenção.
-- **Reaproveitável**: troque a fonte e o prompt, e o mesmo esqueleto serve a outro setor.
+- **Reaproveitável**: troque a fonte e o prompt, e o mesmo esqueleto serve a outro setor
+  (indicadores, tickets, contratos).
 
 ## Próximos passos & fechamento {.smaller}
 

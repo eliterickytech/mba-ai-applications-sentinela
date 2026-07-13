@@ -81,7 +81,9 @@ divulgação científica e defesa planetária. Este trabalho aplica a metodologi
 dirigindo o agente Claude Code, para transformar essa lista num \emph{digest} executivo
 semanal. O pipeline coleta as aproximações da semana na API pública NASA NeoWs, calcula
 um \emph{baseline} físico de risco, e usa um LLM (OpenAI GPT) com \textbf{saída
-estruturada} (Pydantic) para produzir um resumo priorizado. A avaliação é feita em três
+estruturada} (Pydantic) para produzir um resumo priorizado. O ganho de negócio é substituir
+a leitura manual de um feed técnico — trabalho de especialista — por um digest automático de
+custo marginal desprezível, que chega pronto para decisão. A avaliação é feita em três
 camadas: o baseline como classificador da flag oficial da NASA (AUC e F1), a concordância
 entre o LLM e o baseline, e uma auditoria programática da regra de ouro. Todos os números
 deste relatório são gerados por código que roda sobre dados reais.
@@ -98,15 +100,31 @@ deste relatório são gerados por código que roda sobre dados reais.
 A defesa planetária deixou de ser ficção: agências como a NASA mantêm catálogos públicos
 e atualizados de objetos próximos da Terra (*Near-Earth Objects*, NEOs) e programas de
 monitoramento de impacto como o Sentry [@cneos]. O volume, porém, é alto — dezenas de
-aproximações por semana — e a lista bruta não responde à pergunta que um comunicador de
-ciência ou um analista de risco realmente faz: **o que merece atenção esta semana?**
+aproximações por semana — e a lista bruta, técnica e sem priorização, não responde à
+pergunta que quem decide realmente faz: **o que merece atenção esta semana?**
 
-Este trabalho entrega o **Sentinela**, um produto reprodutível que responde a essa pergunta
-toda semana, de forma automática. A contribuição não é um modelo astronômico novo, e sim a
-**engenharia de um pipeline de IA** no espírito da disciplina: um problema de negócio claro,
-dados reais via API, um LLM com **saída estruturada** como camada de comunicação, avaliação
-em múltiplas camadas e entrega automatizada — tudo sob a **regra de ouro** de que nenhum
-número é inventado.
+**Quem decide e qual decisão muda.** O destinatário deste produto é o responsável por
+curadoria e comunicação de um planetário, museu de ciências ou veículo de jornalismo
+científico — e, por extensão, qualquer núcleo de monitoramento de risco de baixa
+probabilidade e alto impacto. A decisão semanal é concreta: *o que destacar, comunicar ou
+escalar* — a pauta da semana, o post nas redes, a nota à imprensa, o alerta interno. Hoje
+essa decisão exige que um profissional com conhecimento técnico leia manualmente o feed da
+NASA e traduza magnitude, diâmetro e distância em "isto importa / isto é rotina"; no cenário
+mais comum, ela simplesmente não é feita, e eventos relevantes passam despercebidos enquanto
+passagens triviais viram alarme falso.
+
+**O valor de negócio.** O Sentinela troca esse trabalho especializado e recorrente por um
+*digest* executivo automático, de custo marginal desprezível (centavos de tokens por
+semana), reprodutível e auditável — horas de análise viram uma execução agendada que chega
+pronta para decisão. Por ser um esqueleto configurável, o mesmo pipeline atende qualquer
+triagem semanal de risco ou atenção — de indicadores setoriais a tickets e contratos —
+bastando trocar a fonte de dados e o *prompt*.
+
+A contribuição, portanto, não é um modelo astronômico novo, e sim a **engenharia de um
+pipeline de IA** no espírito da disciplina: um problema de decisão claro, dados reais via
+API, um LLM com **saída estruturada** como camada de comunicação e julgamento, avaliação em
+múltiplas camadas e entrega automatizada — tudo sob a **regra de ouro** de que nenhum número
+é inventado.
 
 # Revisão da Literatura
 
@@ -306,10 +324,13 @@ custo e fidelidade da saída estruturada.
 # Conclusão
 
 O Sentinela mostra que o valor não está no "chat", e sim no **pipeline**: um problema de
-negócio real vira um produto reprodutível e automatizado, com dados reais, LLM de saída
-estruturada como camada de comunicação e uma avaliação honesta que separa o que o baseline
-faz bem (triar) do que ele não se propõe a fazer (replicar o critério orbital da NASA). O
-método — CRISP-DM dirigindo o agente — é o que se transfere para qualquer outro domínio.
+decisão real — *o que priorizar e comunicar esta semana* — vira um produto reprodutível e
+automatizado que substitui horas de análise especializada por um digest de custo marginal
+desprezível, com dados reais, LLM de saída estruturada como camada de comunicação e uma
+avaliação honesta que separa o que o baseline faz bem (triar) do que ele não se propõe a
+fazer (replicar o critério orbital da NASA). O método — CRISP-DM dirigindo o agente — e o
+esqueleto configurável são o que se transferem para qualquer outra triagem de risco ou
+atenção: basta trocar a fonte e o *prompt*.
 
 # Referências
 
