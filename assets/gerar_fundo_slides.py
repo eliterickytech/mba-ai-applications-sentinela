@@ -79,5 +79,5 @@ html = (
     "  .reveal .slide-background { background: transparent !important; }\n"
     "</style>\n"
 )
-(RAIZ / "fundo.html").write_text(html, encoding="utf-8")
+(RAIZ / "relatorio" / "fundo.html").write_text(html, encoding="utf-8")
 print(f"fundo-slides.png ({PNG.stat().st_size // 1024} KB) e fundo.html gerados.")

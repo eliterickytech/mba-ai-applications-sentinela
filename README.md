@@ -70,9 +70,9 @@ python -m pytest -q
 Precisa do [Quarto](https://quarto.org) e, para PDF, de LaTeX (`quarto install tinytex`):
 
 ```bash
-quarto render paper.qmd --to pdf          # relatório técnico (as 6 fases do CRISP-DM)
-quarto render paper.qmd --to html         # versão rápida, sem LaTeX
-quarto render apresentacao.qmd            # slides executivos (reveal.js)
+quarto render relatorio/paper.qmd --to pdf     # relatório técnico (as 6 fases do CRISP-DM)
+quarto render relatorio/paper.qmd --to html    # versão rápida, sem LaTeX
+quarto render relatorio/apresentacao.qmd       # slides executivos (reveal.js)
 ```
 
 Os `.qmd` leem um *snapshot* real versionado em `dados/amostra_semana.csv`, então
@@ -97,15 +97,21 @@ src/sentinela/
 ├── aplicacao/
 │   └── pipeline.py   # caso de uso: orquestra o pipeline (Fase 6)
 └── __main__.py       # CLI (python -m sentinela)
+
+relatorio/            # relatório e slides (Quarto)
+├── paper.qmd         # relatório técnico → PDF
+├── apresentacao.qmd  # slides executivos
+├── referencias.bib   # bibliografia
+└── fundo.html        # fundo estelar dos slides
 ```
 
 | Fora do pacote | O que é |
 |---|---|
 | `main.py` | Atalho para a CLI (`python -m sentinela`) |
-| `pyproject.toml` | Empacotamento e dependências |
-| `paper.qmd` / `apresentacao.qmd` | Relatório técnico (PDF) e slides |
+| `pyproject.toml` · `requirements.txt` | Empacotamento e dependências |
+| `relatorio/` | Relatório técnico (PDF) e slides (Quarto) |
 | `.github/workflows/semanal.yml` | Agendamento semanal (cron) |
-| `dados/` · `entrega/` · `tests/` | Snapshot real · renderizados · testes |
+| `dados/` · `assets/` · `entrega/` · `tests/` | Snapshot real · imagens · renderizados · testes |
 
 ## Avaliação em três camadas
 

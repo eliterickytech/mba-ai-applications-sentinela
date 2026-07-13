@@ -7,7 +7,7 @@ format:
   revealjs:
     theme: night
     slide-number: true
-    logo: assets/logo.png
+    logo: ../assets/logo.png
     transition: fade
     incremental: false
     embed-resources: true
@@ -59,7 +59,7 @@ Metodologia **CRISP-DM**, dirigindo o **Claude Code**. Regra de ouro: nenhum nú
 import pandas as pd
 from pathlib import Path
 from sentinela.dominio.avaliacao import avaliar_baseline
-df = pd.read_csv(Path("dados") / "amostra_semana.csv")
+df = pd.read_csv(Path("..") / "dados" / "amostra_semana.csv")
 m = avaliar_baseline(df)
 print(f"""
 - **{len(df)} asteroides** monitorados · **{int(df['perigoso_nasa'].sum())}** perigosos (NASA)

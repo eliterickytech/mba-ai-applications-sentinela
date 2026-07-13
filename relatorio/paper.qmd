@@ -47,7 +47,7 @@ execute:
 \thispagestyle{empty}
 \centering
 
-\includegraphics[width=4cm]{assets/logo.png}
+\includegraphics[width=4cm]{../assets/logo.png}
 
 \vspace{0.8cm}
 
@@ -179,7 +179,7 @@ chunks leem um *snapshot* real de uma semana, capturado da NASA e versionado em
 import pandas as pd
 from pathlib import Path
 
-df = pd.read_csv(Path("dados") / "amostra_semana.csv")
+df = pd.read_csv(Path("..") / "dados" / "amostra_semana.csv")
 print(f"Semana capturada: {len(df)} asteroides | "
       f"{int(df['perigoso_nasa'].sum())} potencialmente perigosos (NASA).")
 ```
@@ -227,9 +227,9 @@ Abaixo, o resumo estruturado gerado para esta semana:
 import json
 from sentinela.dominio.modelos import RelatorioSemanal
 
-meta = json.loads(Path("dados/relatorio_meta.json").read_text(encoding="utf-8"))
+meta = json.loads(Path("../dados/relatorio_meta.json").read_text(encoding="utf-8"))
 rel = RelatorioSemanal.model_validate_json(
-    Path("dados/relatorio_exemplo.json").read_text(encoding="utf-8"))
+    Path("../dados/relatorio_exemplo.json").read_text(encoding="utf-8"))
 
 print(f"[proveniência: {meta['gerado_por']}]\n")
 print(f"Título: {rel.titulo}")

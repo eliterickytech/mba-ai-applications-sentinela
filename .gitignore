@@ -11,14 +11,12 @@ __pycache__/
 build/
 dist/
 
-# Quarto (artefatos gerados)
+# Quarto (artefatos gerados — PDFs/HTML renderizados)
 .quarto/
 *_files/
-/*.pdf
-paper.html
-apresentacao.html
+*.pdf
 *.html
-# Exceção: fundo.html é fonte (include-in-header dos slides), não artefato gerado pelo Quarto
+# Exceção: fundo.html é fonte (include-in-header dos slides), não artefato gerado
 !fundo.html
 
 # Exceção: a entrega final renderizada É versionada

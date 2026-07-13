@@ -39,7 +39,7 @@ Aplicação → Infra → Domínio. Ver `src/sentinela/`:
 - `infra/whatsapp.py` — envio pela WhatsApp Cloud API (Meta).
 - `aplicacao/pipeline.py` — orquestra coleta → score → resumo → avaliação → notifica (com DIP).
 - `__main__.py` / `main.py` — CLI (`python -m sentinela`).
-- `paper.qmd` — relatório Quarto (as 6 fases; números só via código).
+- `relatorio/paper.qmd` — relatório Quarto (as 6 fases; números só via código).
 
 ## REGRA DE OURO (inegociável)
 
