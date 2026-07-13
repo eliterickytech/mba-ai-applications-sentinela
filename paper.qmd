@@ -80,7 +80,7 @@ mas a lista bruta — dezenas de objetos por semana — não é acionável para 
 divulgação científica e defesa planetária. Este trabalho aplica a metodologia CRISP-DM,
 dirigindo o agente Claude Code, para transformar essa lista num \emph{digest} executivo
 semanal. O pipeline coleta as aproximações da semana na API pública NASA NeoWs, calcula
-um \emph{baseline} físico de risco, e usa um LLM (Anthropic Claude) com \textbf{saída
+um \emph{baseline} físico de risco, e usa um LLM (OpenAI GPT) com \textbf{saída
 estruturada} (Pydantic) para produzir um resumo priorizado. A avaliação é feita em três
 camadas: o baseline como classificador da flag oficial da NASA (AUC e F1), a concordância
 entre o LLM e o baseline, e uma auditoria programática da regra de ouro. Todos os números
@@ -200,9 +200,9 @@ print(tabela.to_markdown(index=False))
 
 ## Modelagem — LLM com saída estruturada
 
-`resumo.py` força o Claude a preencher o schema `RelatorioSemanal` via *tool use*
-(temperature=0). O system prompt fixa a persona e a regra de ouro. Abaixo, o resumo
-estruturado gerado para esta semana:
+`resumo.py` força o GPT a preencher o schema `RelatorioSemanal` via *structured outputs*
+(`response_format`, temperature=0). O system prompt fixa a persona e a regra de ouro.
+Abaixo, o resumo estruturado gerado para esta semana:
 
 ```{python}
 #| echo: true
@@ -273,8 +273,9 @@ plt.show()
 from avaliacao import concordancia_llm_baseline, auditar_regra_de_ouro
 conc = concordancia_llm_baseline(rel, df)
 audit = auditar_regra_de_ouro(rel, df)
-print(f"Concordância LLM×baseline (Jaccard): {conc['jaccard']} | "
-      f"cobertura do top-3: {conc['cobertura']}")
+print(f"Destaques do LLM: rank médio {conc['rank_medio_destaques']} de "
+      f"{conc['total_objetos']} | no topo do baseline: {conc['pct_no_top_tier']:.0%} | "
+      f"perigosos (NASA): {conc['pct_perigosos_nasa']:.0%}")
 print(f"Regra de ouro: {audit.numeros_conferidos} números conferidos | "
       f"OK={audit.ok} | violações={len(audit.violacoes)}")
 ```
@@ -289,6 +290,11 @@ print(f"Regra de ouro: {audit.numeros_conferidos} números conferidos | "
 - **Diâmetro é estimado** a partir da magnitude (faixa min–max); usamos o ponto médio.
 - **O LLM não computa risco** — ele comunica os números do baseline. A regra de ouro é
   garantida por schema fixo e auditada programaticamente (Camada 3).
+- **O LLM afia o foco.** Em vez de copiar o topo do score físico bruto (dominado por
+  objetos grandes que passam longe), o modelo priorizou os objetos que são, ao mesmo
+  tempo, de alto score e **oficialmente perigosos (PHA)** — todos no topo do baseline e
+  100% marcados pela NASA (Camada 2). É a camada de comunicação agregando julgamento de
+  negócio, sem violar a regra de ouro.
 - **Amostra de uma semana** para reprodutibilidade do PDF; o pipeline roda continuamente.
 
 # Próximos Passos

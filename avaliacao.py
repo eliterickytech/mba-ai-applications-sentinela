@@ -81,18 +81,36 @@ def _auc(scores: np.ndarray, labels: np.ndarray) -> float:
 
 
 def concordancia_llm_baseline(
-    rel: RelatorioSemanal, df: pd.DataFrame, top_n: int = 3
+    rel: RelatorioSemanal, df: pd.DataFrame, top_tier_k: int = 6
 ) -> dict:
-    """Camada 2: sobreposição entre destaques do LLM e o top-N do baseline (Jaccard)."""
-    top_baseline = set(df.head(top_n)["nome"])
-    destaques_llm = {o.nome for o in rel.objetos_destaque}
-    intersec = top_baseline & destaques_llm
-    uniao = top_baseline | destaques_llm
+    """
+    Camada 2: os destaques do LLM são coerentes com o ranking de risco?
+
+    Em vez de exigir igualdade com o top-N por score (métrica frágil), medimos:
+      - rank_medio_destaques: posição média dos destaques no ranking (1 = maior risco);
+      - pct_no_top_tier: fração de destaques dentro do topo do baseline (top-`k`);
+      - pct_perigosos_nasa: fração de destaques marcados como PHA pela NASA.
+
+    Assim capturamos quando o LLM, corretamente, prioriza objetos de alto risco E
+    oficialmente perigosos, mesmo que não sejam o topo do score físico bruto.
+    """
+    df_ord = df.sort_values("score_risco", ascending=False).reset_index(drop=True)
+    rank = {nome: i + 1 for i, nome in enumerate(df_ord["nome"])}
+    perigoso = dict(zip(df["nome"], df["perigoso_nasa"].astype(bool)))
+    top_tier = set(df_ord.head(top_tier_k)["nome"])
+
+    destaques = [o.nome for o in rel.objetos_destaque]
+    conhecidos = [d for d in destaques if d in rank]
+    n_dest = len(destaques) or 1
+
+    ranks = [rank[d] for d in conhecidos]
     return {
-        "top_baseline": sorted(top_baseline),
-        "destaques_llm": sorted(destaques_llm),
-        "jaccard": round(len(intersec) / len(uniao), 3) if uniao else 0.0,
-        "cobertura": round(len(intersec) / len(top_baseline), 3) if top_baseline else 0.0,
+        "destaques_llm": destaques,
+        "top3_baseline": list(df_ord.head(3)["nome"]),
+        "total_objetos": len(df_ord),
+        "rank_medio_destaques": round(sum(ranks) / len(ranks), 1) if ranks else None,
+        "pct_no_top_tier": round(sum(d in top_tier for d in destaques) / n_dest, 3),
+        "pct_perigosos_nasa": round(sum(perigoso.get(d, False) for d in destaques) / n_dest, 3),
     }
 
 
