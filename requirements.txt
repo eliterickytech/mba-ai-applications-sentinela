@@ -1,0 +1,15 @@
+# --- Runtime do pipeline ---
+requests>=2.31
+pandas>=2.0
+numpy>=1.26
+python-dotenv>=1.0
+pydantic>=2.6
+anthropic>=0.40
+
+# --- Relatório (Quarto) e tabelas ---
+matplotlib>=3.8
+jupyter>=1.0
+tabulate>=0.9
+
+# --- Testes ---
+pytest>=8.0

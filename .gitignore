@@ -1,0 +1,25 @@
+# Segredos — NUNCA versionar
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Quarto (artefatos gerados)
+.quarto/
+*_files/
+/*.pdf
+paper.html
+apresentacao.html
+*.html
+
+# Dados/saídas geradas
+saidas/
+*.log
+
+# Sistema
+.DS_Store
+Thumbs.db
