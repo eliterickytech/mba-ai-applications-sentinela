@@ -1,0 +1,104 @@
+---
+title: "Sentinela"
+subtitle: "Radar semanal de risco de asteroides · CRISP-DM + LLM"
+author: "Trabalho Final — AI Applications (MBA)"
+lang: pt-BR
+format:
+  revealjs:
+    theme: night
+    slide-number: true
+    logo: assets/logo.png
+    transition: fade
+    incremental: false
+    embed-resources: true
+execute:
+  eval: true
+  echo: false
+  warning: false
+  message: false
+---
+
+## O problema {.smaller}
+
+A NASA cataloga **dezenas de asteroides por semana** passando perto da Terra.
+
+- A lista bruta **não é acionável** para quem comunica ciência ou avalia risco.
+- A pergunta real: **"o que merece atenção esta semana?"**
+
+::: {.fragment}
+**Decisão que muda:** para onde o núcleo de divulgação/defesa planetária
+direciona atenção e comunicação na semana.
+:::
+
+## A solução — um pipeline, não um chat {.smaller}
+
+```{python}
+#| output: asis
+print("""
+| Etapa | O que faz |
+|---|---|
+| **Coleta** | NASA NeoWs (API pública) → dados da semana |
+| **Baseline** | score físico de risco (tamanho, velocidade, distância) |
+| **LLM** | Claude com **saída estruturada** (Pydantic) → resumo executivo |
+| **Avaliação** | 3 camadas (vs. NASA, concordância, regra de ouro) |
+| **Entrega** | WhatsApp automático, agendado no GitHub Actions |
+""")
+```
+
+::: {.fragment}
+Metodologia **CRISP-DM**, dirigindo o **Claude Code**. Regra de ouro: nenhum número inventado.
+:::
+
+## O resultado desta semana {.smaller}
+
+```{python}
+#| output: asis
+import pandas as pd
+from pathlib import Path
+from avaliacao import avaliar_baseline
+df = pd.read_csv(Path("dados") / "amostra_semana.csv")
+m = avaliar_baseline(df)
+print(f"""
+- **{len(df)} asteroides** monitorados · **{int(df['perigoso_nasa'].sum())}** perigosos (NASA)
+- Maior objeto: **{df['diametro_m'].max():.0f} m** · passagem mais próxima: **{df['distancia_lunar'].min():.0f}** distâncias lunares
+- Baseline vs. flag oficial da NASA: **Recall {m.recall:.0%}** · **AUC {m.auc:.2f}**
+""")
+```
+
+```{python}
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 3.2
+import matplotlib.pyplot as plt
+fig, ax = plt.subplots()
+fig.patch.set_alpha(0); ax.set_facecolor("none")
+for flag, cor, rot in [(False, "#2EC4F1", "não-PHA"), (True, "#F2A900", "PHA (NASA)")]:
+    sub = df[df["perigoso_nasa"] == flag]["score_risco"]
+    ax.scatter(sub, [rot] * len(sub), alpha=0.85, s=70, color=cor, edgecolors="white")
+for spine in ax.spines.values(): spine.set_color("#888")
+ax.tick_params(colors="#DDD"); ax.xaxis.label.set_color("#DDD")
+ax.set_xlabel("score de risco (0–100)")
+plt.tight_layout(); plt.show()
+```
+
+## O valor {.smaller}
+
+- **Recall 100%** → nenhum objeto perigoso da NASA escapa do radar semanal.
+- **Honestidade avaliativa**: sabemos *onde* o baseline acerta (triar) e *onde* não se
+  propõe a acertar (o critério orbital da NASA).
+- **Automático**: chega sozinho no WhatsApp toda semana — zero intervenção.
+- **Reaproveitável**: troque a fonte e o prompt, e o mesmo esqueleto serve a outro setor.
+
+## Próximos passos & fechamento {.smaller}
+
+**v2.0:** escala de Torino + probabilidade de impacto (Sentry); calibração multi-semana;
+comparar provedores de LLM (custo × fidelidade).
+
+::: {.fragment}
+> A disciplina numa frase: **dirigir um agente para transformar um problema de negócio
+> em um produto reprodutível e automatizado.**
+:::
+
+::: {.fragment}
+**Obrigado.** · Código: repositório GitHub · Dados: NASA NeoWs
+:::
