@@ -1,9 +1,9 @@
 # 🛰️ Sentinela — Radar Semanal de Risco de Asteroides
 
 Pipeline de IA que, toda semana, coleta as aproximações de asteroides à Terra na
-**NASA NeoWs**, calcula um score de risco físico (baseline), pede a um **LLM** um resumo
-executivo com **saída estruturada (Pydantic)**, avalia o resultado em três camadas e envia
-o digest pelo **WhatsApp** — agendado no **GitHub Actions**.
+**NASA NeoWs**, calcula um score de risco físico (baseline), pede a um **LLM (OpenAI GPT)**
+um resumo executivo com **saída estruturada (Pydantic)**, avalia o resultado em três
+camadas e envia o digest pelo **WhatsApp** — agendado no **GitHub Actions**.
 
 Trabalho final da disciplina **AI Applications (MBA)** · metodologia **CRISP-DM** dirigindo
 o **Claude Code**. Regra de ouro: **nenhum número é inventado** — todo valor vem de código
@@ -11,7 +11,7 @@ que roda sobre dados reais.
 
 ---
 
-## Pré-requisitos
+## 1. Pré-requisitos
 
 **Obrigatórios:**
 
@@ -29,113 +29,180 @@ que roda sobre dados reais.
   [quarto.org/docs/get-started](https://quarto.org/docs/get-started) e depois
   `quarto install tinytex`
 - **Conta Meta (WhatsApp Cloud API)** — para o envio automático do digest (bônus):
-  [developers.facebook.com](https://developers.facebook.com). Ver seção *WhatsApp* abaixo.
+  [developers.facebook.com](https://developers.facebook.com). Ver seção 6.
 
 > Testado em Windows 11 com Python 3.14; funciona também em macOS e Linux
 > (ajuste só o comando de ativação do `.venv`).
 
-## Como rodar do zero
+---
+
+## 2. Passo a passo de execução
 
 ```bash
-# 1. Ambiente isolado
+# 1. Clonar o repositório
+git clone https://github.com/eliterickytech/mba-ai-applications-sentinela.git
+cd mba-ai-applications-sentinela
+
+# 2. Criar e ativar o ambiente virtual isolado
 python -m venv .venv
 source .venv/Scripts/activate        # Windows: .venv\Scripts\activate
+                                     # macOS/Linux: source .venv/bin/activate
+
+# 3. Instalar tudo (pacote + dependências, definidas no pyproject.toml)
 pip install -r requirements.txt
 
-# 2. Chaves (copie e preencha)
-cp .env.example .env
-#   NASA_API_KEY   -> funciona com DEMO_KEY; sua chave grátis em api.nasa.gov
-#   OPENAI_API_KEY -> platform.openai.com/api-keys  (necessária para o LLM real)
-#   WHATSAPP_*     -> developers.facebook.com (opcional; ver seção WhatsApp)
+# 4. Configurar as chaves
+cp .env.example .env                 # depois edite o .env e preencha:
+#   NASA_API_KEY    -> sua chave grátis (ou DEMO_KEY)
+#   OPENAI_API_KEY  -> necessária para o LLM real (senão use --simular-llm)
+#   WHATSAPP_*      -> opcional; só para o envio (ver seção 6)
 
-# 3. Pipeline completo (via CLI do pacote)
+# 5. Rodar o pipeline (escolha um modo)
 python -m sentinela --simular-llm --sem-envio   # dry-run OFFLINE (sem nenhuma chave)
 python -m sentinela --sem-envio                 # com LLM real, sem enviar WhatsApp
-python -m sentinela                             # tudo: coleta -> LLM -> WhatsApp
-# (equivalente: python main.py [...] — atalho na raiz)
+python -m sentinela                             # completo: coleta -> LLM -> WhatsApp
+#   (equivale a: python main.py [...] — atalho na raiz)
 
-# 4. Testes
+# 6. Rodar os testes
 python -m pytest -q
+
+# 7. (Opcional) Gerar o relatório PDF e os slides — precisa do Quarto + TinyTeX
+quarto render relatorio/paper.qmd --to pdf      # relatório técnico (6 fases do CRISP-DM)
+quarto render relatorio/apresentacao.qmd        # slides executivos (reveal.js)
 ```
 
-> `pip install -r requirements.txt` instala o pacote `sentinela` em modo editável
-> (deps no `pyproject.toml`) + os extras de relatório e testes.
+> **O que cada modo faz:** `--simular-llm` troca o GPT por um resumo determinístico montado
+> a partir dos próprios dados (sem inventar números) — útil sem chave/CI. `--sem-envio` gera
+> todos os artefatos mas não dispara o WhatsApp.
 
-> **Sem chave de LLM?** Use `--simular-llm`: um fallback determinístico monta o mesmo
-> schema a partir dos dados (sem inventar números). Para a entrega, rode com a
-> `OPENAI_API_KEY` de verdade e faça commit do `saidas/relatorio.json` gerado.
+---
 
-## Relatório (paper) e apresentação
+## 3. Onde encontrar a informação gerada
 
-Precisa do [Quarto](https://quarto.org) e, para PDF, de LaTeX (`quarto install tinytex`):
+**A cada execução** o pipeline grava em **`saidas/`** (pasta local, fora do git):
 
-```bash
-quarto render relatorio/paper.qmd --to pdf     # relatório técnico (as 6 fases do CRISP-DM)
-quarto render relatorio/paper.qmd --to html    # versão rápida, sem LaTeX
-quarto render relatorio/apresentacao.qmd       # slides executivos (reveal.js)
-```
-
-Os `.qmd` leem um *snapshot* real versionado em `dados/amostra_semana.csv`, então
-**renderizam sem chave e sem rede** — todo número exibido sai de um chunk que roda.
-
-## Estrutura (arquitetura limpa em camadas)
-
-A dependência aponta sempre para dentro: **aplicação → infra → domínio**. O domínio
-não conhece o mundo externo; a infra adapta serviços (NASA, OpenAI, WhatsApp); a
-aplicação orquestra tudo recebendo os adaptadores por injeção (DIP).
-
-```
-src/sentinela/
-├── dominio/          # regras de negócio puras (sem I/O)
-│   ├── modelos.py    # entidades Pydantic (saída estruturada)
-│   ├── risco.py      # baseline de score de risco (Fase 4)
-│   └── avaliacao.py  # 3 camadas de avaliação (Fase 5)
-├── infra/            # adaptadores externos (I/O)
-│   ├── nasa.py       # coleta NeoWs (Fase 3)
-│   ├── llm.py        # OpenAI GPT + structured output (Fase 4)
-│   └── whatsapp.py   # Meta Cloud API (Fase 6)
-├── aplicacao/
-│   └── pipeline.py   # caso de uso: orquestra o pipeline (Fase 6)
-└── __main__.py       # CLI (python -m sentinela)
-
-relatorio/            # relatório e slides (Quarto)
-├── paper.qmd         # relatório técnico → PDF
-├── apresentacao.qmd  # slides executivos
-├── referencias.bib   # bibliografia
-└── fundo.html        # fundo estelar dos slides
-```
-
-| Fora do pacote | O que é |
+| Arquivo | O que contém |
 |---|---|
-| `main.py` | Atalho para a CLI (`python -m sentinela`) |
-| `pyproject.toml` · `requirements.txt` | Empacotamento e dependências |
-| `relatorio/` | Relatório técnico (PDF) e slides (Quarto) |
-| `.github/workflows/semanal.yml` | Agendamento semanal (cron) |
-| `dados/` · `assets/` · `entrega/` · `tests/` | Snapshot real · imagens · renderizados · testes |
+| `saidas/amostra_semana.csv` | A semana coletada da NASA, já com o score de risco de cada asteroide |
+| `saidas/relatorio.json` | A **saída estruturada do LLM** (título, bullets, objetos de destaque, alerta) |
+| `saidas/avaliacao.json` | As métricas das **3 camadas** (F1, AUC, concordância, auditoria da regra de ouro) |
+| `saidas/mensagem.txt` | A mensagem exatamente como foi formatada e enviada ao WhatsApp |
 
-## Avaliação em três camadas
+**Entregáveis renderizados** (versionados) ficam em **`entrega/`**:
+
+| Arquivo | O que é |
+|---|---|
+| `entrega/paper.pdf` | Relatório técnico final (as 6 fases do CRISP-DM) |
+| `entrega/apresentacao.html` | Slides executivos (abra no navegador) |
+
+**No WhatsApp:** se rodar sem `--sem-envio`, o digest chega no número configurado em
+`WHATSAPP_DESTINO`.
+
+> Os arquivos em `dados/` são um *snapshot real* de referência (uma semana já capturada da
+> NASA + saída do GPT), usado pelo relatório para renderizar sem precisar de chave nem rede.
+
+---
+
+## 4. Estrutura completa do projeto
+
+```
+sentinela/
+│
+├── src/sentinela/            # 🧩 O CÓDIGO — arquitetura limpa em camadas
+│   ├── __init__.py           # define o pacote e sua versão
+│   ├── __main__.py           # CLI: implementa `python -m sentinela`
+│   │
+│   ├── dominio/              # 🧠 regras de negócio puras (sem I/O externo)
+│   │   ├── modelos.py        # entidades Pydantic (o schema da saída estruturada)
+│   │   ├── risco.py          # baseline: score de risco físico 0–100 (Fase 4)
+│   │   └── avaliacao.py      # as 3 camadas de avaliação (Fase 5)
+│   │
+│   ├── infra/               # 🔌 adaptadores de serviços externos (I/O)
+│   │   ├── nasa.py           # coleta na NASA NeoWs, com retry/backoff (Fase 3)
+│   │   ├── llm.py            # OpenAI GPT + structured output (Fase 4)
+│   │   └── whatsapp.py       # envio pela Meta WhatsApp Cloud API (Fase 6)
+│   │
+│   └── aplicacao/           # 🎯 orquestração
+│       └── pipeline.py       # o caso de uso: junta as camadas (com injeção de deps)
+│
+├── relatorio/               # 📄 relatório e slides (Quarto)
+│   ├── paper.qmd             # fonte do relatório técnico → PDF
+│   ├── apresentacao.qmd      # fonte dos slides executivos
+│   ├── referencias.bib       # bibliografia (BibTeX)
+│   └── fundo.html            # fundo estelar dos slides (imagem embutida)
+│
+├── dados/                   # 📦 snapshot real (lido pelo relatório)
+│   ├── amostra_semana.csv    # uma semana capturada da NASA (com score)
+│   ├── relatorio_exemplo.json# a saída estruturada real do GPT para essa semana
+│   └── relatorio_meta.json   # proveniência do exemplo acima
+│
+├── assets/                  # 🎨 imagens e seus geradores
+│   ├── logo.png              # logo do projeto
+│   ├── earth-nasa.jpg        # Terra (NASA Blue Marble, domínio público)
+│   ├── fundo-slides.png      # fundo dos slides (gerado)
+│   ├── gerar_logo.py         # script que cria o logo
+│   └── gerar_fundo_slides.py # script que cria o fundo dos slides
+│
+├── entrega/                 # ✅ entregáveis renderizados (versionados)
+│   ├── paper.pdf             # relatório técnico final
+│   └── apresentacao.html     # slides executivos
+│
+├── tests/                   # 🧪 testes
+│   └── test_pipeline.py      # parsing, score, métricas, regra de ouro, pipeline
+│
+├── .github/workflows/
+│   └── semanal.yml           # agendamento semanal na nuvem (cron)
+│
+├── main.py                   # atalho da CLI (equivale a `python -m sentinela`)
+├── pyproject.toml            # empacotamento e dependências (fica na raiz por convenção)
+├── requirements.txt          # instala o pacote + extras num comando
+├── CLAUDE.md                 # briefing do projeto e a regra de ouro
+├── README.md                 # este arquivo
+├── .gitignore                # o que não vai para o git (inclui .env e saidas/)
+└── .env.example              # modelo das chaves (copie para .env e preencha)
+```
+
+**Não versionados** (criados localmente): `.venv/` (ambiente), `.env` (suas chaves) e
+`saidas/` (resultados de cada execução).
+
+---
+
+## 5. Arquitetura e avaliação
+
+**Camadas (dependência aponta para dentro):** `aplicação → infra → domínio`. O domínio não
+conhece NASA, OpenAI nem WhatsApp; a infra adapta esses serviços; a aplicação orquestra
+recebendo os adaptadores por **injeção de dependência** (DIP). Trocar o LLM ou o canal de
+envio mexe só na pasta `infra/`.
+
+**Avaliação em três camadas** (`dominio/avaliacao.py`):
 
 1. **Baseline vs. flag oficial da NASA** — o `score_risco` como classificador da flag
    *potentially hazardous* (matriz de confusão, precisão, recall, F1, AUC).
 2. **Concordância LLM × baseline** — os destaques do LLM são coerentes com o ranking de
-   risco? (rank médio dos destaques, % no topo do baseline e % marcados como perigosos
-   pela NASA).
+   risco? (rank médio, % no topo do baseline e % marcados como perigosos pela NASA).
 3. **Auditoria da regra de ouro** — todo número citado pelo LLM existe mesmo nos dados?
-   (checagem programática; um teste garante que um número inventado é detectado).
+   (checagem programática; um teste garante que um número inventado seria detectado).
 
-## WhatsApp (bônus — automação real)
+---
+
+## 6. WhatsApp (bônus — automação real)
 
 1. Crie um app *Business* em [developers.facebook.com](https://developers.facebook.com) e
    adicione o produto **WhatsApp**.
-2. Em *API Setup*, pegue `Phone number ID` e o token de teste, e cadastre seu número.
+2. Em *API Setup*, pegue o **token**, o **Phone number ID** e cadastre o número que vai
+   receber (na conta de teste, só entrega para números cadastrados).
 3. Preencha `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID` e `WHATSAPP_DESTINO` no `.env`.
-4. Na nuvem, cadastre os mesmos valores em *Settings → Secrets and variables → Actions*.
+4. Para a automação na nuvem, cadastre os mesmos valores + `NASA_API_KEY` e `OPENAI_API_KEY`
+   em *Settings → Secrets and variables → Actions* do repositório. O workflow
+   `.github/workflows/semanal.yml` roda toda segunda às 8h (Brasília).
 
-## Segurança
+> O token de teste da Meta é temporário (~24h). Para o agendamento rodar sozinho, gere um
+> token permanente (System User no Business Manager).
 
-Chaves ficam **só** no `.env` (que está no `.gitignore`) ou nos *Secrets* do GitHub.
-Nunca no código, nunca no commit.
+---
 
-## Fonte de dados
+## 7. Segurança e fonte de dados
 
-NASA NeoWs — Near Earth Object Web Service · <https://api.nasa.gov>
+- **Segredos** ficam **só** no `.env` (que está no `.gitignore`) ou nos *Secrets* do GitHub.
+  Nunca no código, nunca no commit.
+- **Fonte:** NASA NeoWs — Near Earth Object Web Service · <https://api.nasa.gov>
