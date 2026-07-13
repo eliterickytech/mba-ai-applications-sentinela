@@ -58,7 +58,7 @@ Metodologia **CRISP-DM**, dirigindo o **Claude Code**. Regra de ouro: nenhum nú
 #| output: asis
 import pandas as pd
 from pathlib import Path
-from avaliacao import avaliar_baseline
+from sentinela.dominio.avaliacao import avaliar_baseline
 df = pd.read_csv(Path("dados") / "amostra_semana.csv")
 m = avaliar_baseline(df)
 print(f"""

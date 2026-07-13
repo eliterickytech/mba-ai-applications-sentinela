@@ -159,7 +159,7 @@ vira a mensagem de WhatsApp:
 
 ```{python}
 #| echo: true
-from schema import RelatorioSemanal
+from sentinela.dominio.modelos import RelatorioSemanal
 campos = {k: v.get("type", v.get("anyOf", "?"))
           for k, v in RelatorioSemanal.model_json_schema()["properties"].items()}
 for nome, tipo in campos.items():
@@ -225,7 +225,7 @@ Abaixo, o resumo estruturado gerado para esta semana:
 ```{python}
 #| echo: true
 import json
-from schema import RelatorioSemanal
+from sentinela.dominio.modelos import RelatorioSemanal
 
 meta = json.loads(Path("dados/relatorio_meta.json").read_text(encoding="utf-8"))
 rel = RelatorioSemanal.model_validate_json(
@@ -251,7 +251,7 @@ classificador da flag PHA e varremos o limiar de decisão:
 #| echo: false
 #| label: tbl-limiar
 #| tbl-cap: "Baseline como classificador da flag PHA, por limiar de decisão."
-from avaliacao import avaliar_baseline
+from sentinela.dominio.avaliacao import avaliar_baseline
 linhas = []
 for lim in (25, 40, 50, 60, 75):
     m = avaliar_baseline(df, limiar=lim)
@@ -288,7 +288,7 @@ plt.show()
 
 ```{python}
 #| echo: false
-from avaliacao import concordancia_llm_baseline, auditar_regra_de_ouro
+from sentinela.dominio.avaliacao import concordancia_llm_baseline, auditar_regra_de_ouro
 conc = concordancia_llm_baseline(rel, df)
 audit = auditar_regra_de_ouro(rel, df)
 print(f"Destaques do LLM: rank médio {conc['rank_medio_destaques']} de "

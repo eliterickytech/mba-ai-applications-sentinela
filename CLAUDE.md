@@ -27,14 +27,19 @@ classificação oficial da NASA (`is_potentially_hazardous_asteroid`).
   e por aproximação: `close_approach_date_full`, `relative_velocity.kilometers_per_second`,
   `miss_distance.lunar` e `.kilometers`.
 
-## Pipeline (módulos)
+## Arquitetura (camadas — dependência aponta para dentro)
 
-1. `coleta.py`  — NeoWs → DataFrame limpo da semana (retry + backoff).
-2. `score.py`   — baseline de risco físico (tamanho, velocidade, distância).
-3. `resumo.py`  — LLM (OpenAI / GPT) com **saída estruturada Pydantic**.
-4. `notifica.py`— envio pela WhatsApp Cloud API (Meta).
-5. `main.py`    — orquestra coleta → score → resumo → notifica.
-6. `avaliacao.qmd` — paper Quarto (as 6 fases; números só via código).
+Aplicação → Infra → Domínio. Ver `src/sentinela/`:
+
+- `dominio/modelos.py` — entidades Pydantic (saída estruturada).
+- `dominio/risco.py` — baseline de risco físico (tamanho, velocidade, distância).
+- `dominio/avaliacao.py` — 3 camadas de avaliação (vs. NASA, concordância, regra de ouro).
+- `infra/nasa.py` — NeoWs → DataFrame limpo (retry + backoff).
+- `infra/llm.py` — LLM (OpenAI/GPT) com structured output.
+- `infra/whatsapp.py` — envio pela WhatsApp Cloud API (Meta).
+- `aplicacao/pipeline.py` — orquestra coleta → score → resumo → avaliação → notifica (com DIP).
+- `__main__.py` / `main.py` — CLI (`python -m sentinela`).
+- `paper.qmd` — relatório Quarto (as 6 fases; números só via código).
 
 ## REGRA DE OURO (inegociável)
 

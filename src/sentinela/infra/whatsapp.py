@@ -1,9 +1,9 @@
 """
-notifica.py — Fase 6 (Implantação): envio do digest pela WhatsApp Cloud API (Meta).
+infra/whatsapp.py — Fase 6 (Implantação): envio do digest pela WhatsApp Cloud API (Meta).
 
-Lê do .env: WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID e WHATSAPP_DESTINO.
-Faz POST na Graph API. Se o envio de texto livre falhar (janela de 24h fechada),
-cai para um template aprovado (hello_world). Levanta erro claro em status != 200.
+Adaptador da Graph API (Meta). Lê do .env: WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID e
+WHATSAPP_DESTINO. Se o envio de texto livre falhar (janela de 24h fechada), cai para um
+template aprovado (hello_world). Levanta erro claro em status != 200.
 
 O texto é formatado a partir do schema RelatorioSemanal — a mensagem nasce da
 saída estruturada, não de texto solto.
@@ -16,7 +16,7 @@ import os
 import requests
 from dotenv import load_dotenv
 
-from schema import RelatorioSemanal
+from ..dominio.modelos import RelatorioSemanal
 
 load_dotenv()
 

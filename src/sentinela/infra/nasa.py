@@ -1,14 +1,14 @@
 """
-coleta.py — Fase 3 (Preparação): coleta as aproximações de asteroides da semana.
+infra/nasa.py — Fase 3 (Preparação): coleta as aproximações de asteroides da semana.
 
-Busca na NASA NeoWs (Near Earth Object Web Service) todos os objetos que passam
-perto da Terra nos últimos 7 dias e devolve um DataFrame limpo e pequeno — só as
-colunas que interessam ao score de risco e ao resumo.
+Adaptador da NASA NeoWs (Near Earth Object Web Service): busca todos os objetos que
+passam perto da Terra nos últimos 7 dias e devolve um DataFrame limpo e pequeno — só
+as colunas que interessam ao score de risco e ao resumo.
 
 REGRA DE OURO: todo número deste projeto nasce aqui, dos dados reais da NASA.
 
 Uso:
-    python coleta.py            # imprime um resumo da semana atual
+    python -m sentinela.infra.nasa      # imprime um resumo da semana atual
 """
 
 from __future__ import annotations

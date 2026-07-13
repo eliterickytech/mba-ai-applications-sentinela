@@ -48,19 +48,18 @@ cp .env.example .env
 #   OPENAI_API_KEY -> platform.openai.com/api-keys  (necessária para o LLM real)
 #   WHATSAPP_*     -> developers.facebook.com (opcional; ver seção WhatsApp)
 
-# 3. Rodar cada etapa isoladamente
-python coleta.py        # coleta a semana da NASA
-python score.py         # baseline de risco físico
-python avaliacao.py     # métricas baseline x flag oficial da NASA
+# 3. Pipeline completo (via CLI do pacote)
+python -m sentinela --simular-llm --sem-envio   # dry-run OFFLINE (sem nenhuma chave)
+python -m sentinela --sem-envio                 # com LLM real, sem enviar WhatsApp
+python -m sentinela                             # tudo: coleta -> LLM -> WhatsApp
+# (equivalente: python main.py [...] — atalho na raiz)
 
-# 4. Pipeline completo
-python main.py --simular-llm --sem-envio   # dry-run OFFLINE (sem nenhuma chave)
-python main.py --sem-envio                 # com LLM real, sem enviar WhatsApp
-python main.py                             # tudo: coleta -> LLM -> WhatsApp
-
-# 5. Testes
+# 4. Testes
 python -m pytest -q
 ```
+
+> `pip install -r requirements.txt` instala o pacote `sentinela` em modo editável
+> (deps no `pyproject.toml`) + os extras de relatório e testes.
 
 > **Sem chave de LLM?** Use `--simular-llm`: um fallback determinístico monta o mesmo
 > schema a partir dos dados (sem inventar números). Para a entrega, rode com a
@@ -79,21 +78,34 @@ quarto render apresentacao.qmd            # slides executivos (reveal.js)
 Os `.qmd` leem um *snapshot* real versionado em `dados/amostra_semana.csv`, então
 **renderizam sem chave e sem rede** — todo número exibido sai de um chunk que roda.
 
-## Estrutura
+## Estrutura (arquitetura limpa em camadas)
 
-| Arquivo | Fase CRISP-DM | O que faz |
-|---|---|---|
-| `coleta.py` | Preparação | NASA NeoWs → DataFrame limpo (retry + backoff) |
-| `score.py` | Modelagem (baseline) | Score de risco físico 0–100 |
-| `schema.py` | Modelagem | Contratos Pydantic (saída estruturada) |
-| `resumo.py` | Modelagem (LLM) | OpenAI GPT + structured output |
-| `avaliacao.py` | Avaliação | 3 camadas: vs. NASA, concordância, regra de ouro |
-| `notifica.py` | Implantação | WhatsApp Cloud API |
-| `main.py` | Implantação | Orquestra o pipeline |
-| `paper.qmd` | — | Relatório técnico (Quarto → PDF) |
-| `apresentacao.qmd` | — | Slides executivos |
-| `.github/workflows/semanal.yml` | Implantação | Agendamento semanal (cron) |
-| `tests/` | — | Testes (parsing, score, métricas, regra de ouro) |
+A dependência aponta sempre para dentro: **aplicação → infra → domínio**. O domínio
+não conhece o mundo externo; a infra adapta serviços (NASA, OpenAI, WhatsApp); a
+aplicação orquestra tudo recebendo os adaptadores por injeção (DIP).
+
+```
+src/sentinela/
+├── dominio/          # regras de negócio puras (sem I/O)
+│   ├── modelos.py    # entidades Pydantic (saída estruturada)
+│   ├── risco.py      # baseline de score de risco (Fase 4)
+│   └── avaliacao.py  # 3 camadas de avaliação (Fase 5)
+├── infra/            # adaptadores externos (I/O)
+│   ├── nasa.py       # coleta NeoWs (Fase 3)
+│   ├── llm.py        # OpenAI GPT + structured output (Fase 4)
+│   └── whatsapp.py   # Meta Cloud API (Fase 6)
+├── aplicacao/
+│   └── pipeline.py   # caso de uso: orquestra o pipeline (Fase 6)
+└── __main__.py       # CLI (python -m sentinela)
+```
+
+| Fora do pacote | O que é |
+|---|---|
+| `main.py` | Atalho para a CLI (`python -m sentinela`) |
+| `pyproject.toml` | Empacotamento e dependências |
+| `paper.qmd` / `apresentacao.qmd` | Relatório técnico (PDF) e slides |
+| `.github/workflows/semanal.yml` | Agendamento semanal (cron) |
+| `dados/` · `entrega/` · `tests/` | Snapshot real · renderizados · testes |
 
 ## Avaliação em três camadas
 

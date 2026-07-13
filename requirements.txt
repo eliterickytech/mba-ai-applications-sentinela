@@ -1,15 +1,4 @@
-# --- Runtime do pipeline ---
-requests>=2.31
-pandas>=2.0
-numpy>=1.26
-python-dotenv>=1.0
-pydantic>=2.6
-openai>=1.40
-
-# --- Relatório (Quarto) e tabelas ---
-matplotlib>=3.8
-jupyter>=1.0
-tabulate>=0.9
-
-# --- Testes ---
-pytest>=8.0
+# Instala o pacote Sentinela em modo editável (dependências definidas no pyproject.toml)
+# + os extras para renderizar o relatório/slides (relatorio) e rodar os testes (dev).
+# Um único comando prepara tudo:  pip install -r requirements.txt
+-e .[relatorio,dev]

@@ -1,30 +1,24 @@
 """
-resumo.py — Fase 4 (Modelagem/LLM): resumo executivo com saída estruturada.
+infra/llm.py — Fase 4 (Modelagem/LLM): resumo executivo com saída estruturada.
 
-Usa a API da OpenAI (gpt-4o-mini, temperature=0) e FORÇA o modelo a devolver o
+Adaptador da API da OpenAI (gpt-4o-mini, temperature=0): FORÇA o modelo a devolver o
 schema `RelatorioSemanal` via structured outputs (response_format = modelo Pydantic).
 O LLM apenas ORGANIZA e COMUNICA os números que já vêm dos dados — nunca inventa
-(REGRA DE OURO reforçada no system prompt e verificada depois em avaliacao.py).
+(REGRA DE OURO reforçada no system prompt e verificada depois em dominio/avaliacao.py).
 
 Há também `gerar_resumo_simulado()`: um fallback determinístico, SEM IA, que monta
 o mesmo schema a partir dos dados. Serve para rodar o pipeline em CI ou sem chave
 de API — deixando claro que não é o resultado do LLM.
-
-Uso:
-    python resumo.py            # requer OPENAI_API_KEY no .env
-    python resumo.py --simular  # fallback sem IA
 """
 
 from __future__ import annotations
 
 import json
-import os
-import sys
 
 import pandas as pd
 from dotenv import load_dotenv
 
-from schema import AsteroideDestaque, RelatorioSemanal
+from ..dominio.modelos import AsteroideDestaque, RelatorioSemanal
 
 load_dotenv()
 
@@ -150,14 +144,3 @@ def gerar_resumo_simulado(df: pd.DataFrame) -> RelatorioSemanal:
             else None
         ),
     )
-
-
-if __name__ == "__main__":
-    from score import calcular_score
-    from coleta import coletar_semana
-
-    df = calcular_score(coletar_semana())
-    simular = "--simular" in sys.argv
-    rel = gerar_resumo_simulado(df) if simular else gerar_resumo(df)
-    print(("[SIMULADO] " if simular else "[LLM/GPT] ") + rel.titulo)
-    print(json.dumps(rel.model_dump(), ensure_ascii=False, indent=2))

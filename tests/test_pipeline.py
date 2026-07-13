@@ -8,18 +8,12 @@ de número inventado).
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 import pandas as pd
-import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from avaliacao import auditar_regra_de_ouro, avaliar_baseline  # noqa: E402
-from coleta import _achatar_objeto  # noqa: E402
-from schema import AsteroideDestaque, RelatorioSemanal  # noqa: E402
-from score import calcular_score  # noqa: E402
+from sentinela.dominio.avaliacao import auditar_regra_de_ouro, avaliar_baseline
+from sentinela.dominio.modelos import AsteroideDestaque, RelatorioSemanal
+from sentinela.dominio.risco import calcular_score
+from sentinela.infra.nasa import _achatar_objeto
 
 
 # --- Fixture: um objeto no formato cru da NeoWs ---
@@ -115,3 +109,23 @@ def test_regra_de_ouro_aprova_numeros_corretos():
             diametro_m=real["diametro_m"])],
     )
     assert auditar_regra_de_ouro(rel, df).ok is True
+
+
+def test_pipeline_com_dependencias_injetadas(tmp_path, monkeypatch):
+    """O caso de uso roda ponta a ponta com adaptadores falsos (sem rede/LLM/WhatsApp)."""
+    from sentinela.aplicacao import pipeline
+
+    monkeypatch.setattr(pipeline, "SAIDAS", tmp_path)   # artefatos em pasta temporária
+    enviados: list[str] = []
+
+    resultado = pipeline.executar(
+        simular_llm=True,                                # resumo determinístico, sem IA
+        enviar=True,
+        coletor=lambda: _df_exemplo(),                   # "NASA" falsa
+        notificador=lambda msg: enviados.append(msg) or {"messages": [{"id": "fake"}]},
+    )
+
+    assert resultado["relatorio"].titulo
+    assert len(enviados) == 1                            # o notificador injetado foi chamado
+    assert (tmp_path / "relatorio.json").exists()        # artefatos persistidos
+    assert (tmp_path / "amostra_semana.csv").exists()

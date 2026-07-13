@@ -1,9 +1,8 @@
 """
-score.py — Fase 4 (Modelagem/baseline): score de risco físico dos asteroides.
+dominio/risco.py — Fase 4 (Modelagem/baseline): score de risco físico dos asteroides.
 
 Este é o BASELINE do projeto — uma heurística transparente, sem IA, contra a qual
-o resultado do LLM (resumo.py) e a flag oficial da NASA serão comparados na
-Avaliação (Fase 5).
+o resultado do LLM e a flag oficial da NASA serão comparados na Avaliação (Fase 5).
 
 Ideia física (proxies, não valores absolutos):
   - Massa é proporcional ao volume, ou seja, ao diâmetro ao cubo (densidade ~ const).
@@ -13,16 +12,13 @@ Ideia física (proxies, não valores absolutos):
 O risco bruto varia por muitas ordens de grandeza, então trabalhamos em escala log
 e normalizamos para 0-100 DENTRO da semana (é um ranking relativo àquela semana).
 
-Uso:
-    python score.py
+Camada de domínio: recebe e devolve DataFrames; não faz I/O externo.
 """
 
 from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-
-from coleta import coletar_semana
 
 # Limiares do score normalizado (0-100) para rotular o nível de atenção.
 LIMIARES_NIVEL = [(75, "Crítico"), (50, "Alto"), (25, "Médio"), (0, "Baixo")]
@@ -62,13 +58,3 @@ def calcular_score(df: pd.DataFrame) -> pd.DataFrame:
 
     df["nivel"] = df["score_risco"].apply(_rotular)
     return df.sort_values("score_risco", ascending=False).reset_index(drop=True)
-
-
-if __name__ == "__main__":
-    df = calcular_score(coletar_semana())
-    if df.empty:
-        print("Nenhuma aproximação nesta semana.")
-    else:
-        cols = ["nome", "diametro_m", "velocidade_kms", "distancia_lunar",
-                "score_risco", "nivel", "perigoso_nasa"]
-        print(df[cols].to_string(index=False))

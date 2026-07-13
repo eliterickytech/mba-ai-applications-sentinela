@@ -1,5 +1,5 @@
 """
-avaliacao.py — Fase 5 (Avaliação): valida o pipeline em VÁRIAS camadas.
+dominio/avaliacao.py — Fase 5 (Avaliação): valida o pipeline em VÁRIAS camadas.
 
 Nunca confiamos num número só. Aqui medimos:
 
@@ -8,13 +8,13 @@ Nunca confiamos num número só. Aqui medimos:
       Métricas: matriz de confusão, precisão, recall, F1, acurácia e AUC.
 
   Camada 2 — Concordância LLM vs baseline:
-      os objetos que o LLM destacou coincidem com o topo do ranking físico?
-      Métrica: sobreposição (Jaccard) dos nomes.
+      os destaques do LLM são coerentes com o ranking de risco?
+      Métricas: rank médio, % no topo do baseline e % perigosos (NASA).
 
   Camada 3 — Auditoria da REGRA DE OURO:
       todo número citado pelo LLM realmente existe nos dados? (checagem factual)
 
-Tudo em numpy/pandas puro — sem dependências pesadas.
+Camada de domínio: numpy/pandas puro — sem I/O externo.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 import numpy as np
 import pandas as pd
 
-from schema import RelatorioSemanal
+from .modelos import RelatorioSemanal
 
 LIMIAR_PADRAO = 50.0  # score_risco >= limiar => "previsto perigoso" pelo baseline
 
@@ -166,15 +166,3 @@ def relatorio_avaliacao(df: pd.DataFrame, rel: RelatorioSemanal | None = None) -
         saida["concordancia"] = concordancia_llm_baseline(rel, df)
         saida["regra_de_ouro"] = auditar_regra_de_ouro(rel, df).__dict__
     return saida
-
-
-if __name__ == "__main__":
-    from score import calcular_score
-    from coleta import coletar_semana
-
-    df = calcular_score(coletar_semana())
-    m = avaliar_baseline(df)
-    print("=== Camada 1 — Baseline vs flag oficial da NASA ===")
-    print(f"n={m.n} | perigosos={m.n_perigosos} | limiar={m.limiar}")
-    print(f"Confusão: TP={m.tp} FP={m.fp} FN={m.fn} TN={m.tn}")
-    print(f"Precisão={m.precisao} Recall={m.recall} F1={m.f1} Acurácia={m.acuracia} AUC={m.auc}")

@@ -18,10 +18,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Instalar dependências
+      - name: Instalar o pacote (só runtime)
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -e .
 
       - name: Rodar o pipeline (coleta → score → LLM → WhatsApp)
         env:
@@ -30,7 +30,7 @@ jobs:
           WHATSAPP_TOKEN: ${{ secrets.WHATSAPP_TOKEN }}
           WHATSAPP_PHONE_NUMBER_ID: ${{ secrets.WHATSAPP_PHONE_NUMBER_ID }}
           WHATSAPP_DESTINO: ${{ secrets.WHATSAPP_DESTINO }}
-        run: python main.py
+        run: python -m sentinela
 
       - name: Guardar artefatos da semana
         if: always()
