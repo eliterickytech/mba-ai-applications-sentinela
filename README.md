@@ -11,6 +11,29 @@ que roda sobre dados reais.
 
 ---
 
+## Pré-requisitos
+
+**Obrigatórios:**
+
+- **Python ≥ 3.10** — [python.org/downloads](https://www.python.org/downloads/) (no Windows,
+  marque *Add Python to PATH* na instalação)
+- **Git** — [git-scm.com](https://git-scm.com)
+- **Chave da NASA NeoWs** — grátis em [api.nasa.gov](https://api.nasa.gov)
+  (ou use `DEMO_KEY`, com limite de requisições mais baixo)
+- **Chave da OpenAI** — [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+  (paga por uso; custa centavos por execução). *Sem ela, rode no modo `--simular-llm`.*
+
+**Opcionais:**
+
+- **Quarto + TinyTeX** — para gerar o relatório em PDF e os slides:
+  [quarto.org/docs/get-started](https://quarto.org/docs/get-started) e depois
+  `quarto install tinytex`
+- **Conta Meta (WhatsApp Cloud API)** — para o envio automático do digest (bônus):
+  [developers.facebook.com](https://developers.facebook.com). Ver seção *WhatsApp* abaixo.
+
+> Testado em Windows 11 com Python 3.14; funciona também em macOS e Linux
+> (ajuste só o comando de ativação do `.venv`).
+
 ## Como rodar do zero
 
 ```bash
@@ -76,8 +99,9 @@ Os `.qmd` leem um *snapshot* real versionado em `dados/amostra_semana.csv`, ent�
 
 1. **Baseline vs. flag oficial da NASA** — o `score_risco` como classificador da flag
    *potentially hazardous* (matriz de confusão, precisão, recall, F1, AUC).
-2. **Concordância LLM × baseline** — os destaques do LLM coincidem com o topo do ranking
-   físico? (Jaccard).
+2. **Concordância LLM × baseline** — os destaques do LLM são coerentes com o ranking de
+   risco? (rank médio dos destaques, % no topo do baseline e % marcados como perigosos
+   pela NASA).
 3. **Auditoria da regra de ouro** — todo número citado pelo LLM existe mesmo nos dados?
    (checagem programática; um teste garante que um número inventado é detectado).
 
